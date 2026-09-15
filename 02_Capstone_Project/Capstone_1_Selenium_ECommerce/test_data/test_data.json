@@ -1,4 +1,6 @@
 {
-    "email" : "ujjawal.testmail@gmail.com",
-    "password" : "testAccount"
+    "email": "testuser1O1@gmail.com",
+    "password": "testUser",
+    "product": "Men Tshirt",
+    "quantity": 4
 }

@@ -8,7 +8,7 @@ import time
 driver = webdriver.Chrome()
 
 # we need to open tutorialsNinja login page
-driver.get("https://tutorialsninja.com/demo/index.php?route=account/login")
+driver.get("https://automationexercise.com/login")
 
 # REad login credentials from json file
 with open("../test_data/test_data.json", "r") as file:
@@ -18,13 +18,13 @@ email = data["email"]
 password = data["password"]
 
 # Enter email address
-driver.find_element(By.ID, "input-email").send_keys(email)
+driver.find_element(By.CSS_SELECTOR, "[data-qa='login-email']").send_keys(email)
 
 # Enter password
-driver.find_element(By.ID, "input-password").send_keys(password)
+driver.find_element(By.CSS_SELECTOR, "[data-qa='login-password']").send_keys(password)
 
 # Click on Login button
-driver.find_element(By.CSS_SELECTOR, "input[type='submit'][value='Login']").click()
+driver.find_element(By.CSS_SELECTOR, "[data-qa='login-button']").click()
 
 # we will wait for some time so that we can observe the result.
 time.sleep(5)
@@ -33,7 +33,7 @@ time.sleep(5)
 print("Page title: ", driver.title)
 print("Current URL: ", driver.current_url)
 
-if "account/account" in driver.current_url:
+if "Logged in as" in driver.page_source:
     print("Login Successful")
 else:
     print("Login Failed")

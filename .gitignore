@@ -11,3 +11,6 @@ __pycache__/
 
 #Test report temporary files
 *.log
+
+# ignore crendetial
+test_data/test_data.json
