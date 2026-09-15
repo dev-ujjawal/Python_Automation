@@ -12,5 +12,5 @@ __pycache__/
 #Test report temporary files
 *.log
 
-# ignore crendetial
-test_data/test_data.json
+# test_data.json file
+02_Capstone_Project/Capstone_1_Selenium_ECommerce/test_data/test_data.json
