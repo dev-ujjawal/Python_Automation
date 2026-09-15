@@ -40,25 +40,37 @@ driver.find_element(
     "submit_search"    
 ).click()
 
-# wait for the search result
+# Wait for the search result
 WebDriverWait(driver, 10).until(
     EC.visibility_of_element_located(
-        (By.ID, "quantity")
+        (By.XPATH, "//h2[normalize-space()='Searched Products']")
     )
 )
 
-# open men tshirt product details
-driver.find_element(
-    By.CSS_SELECTOR,
-    "a[href='/product_details/2']"
-).click()
+print("Searched Products heading displayed.")
 
-# wait for the quantity field on product page
+# Get Men Tshirt product link from search results
+product_link = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.CSS_SELECTOR, "a[href='/product_details/2']")
+    )
+)
+
+product_url = product_link.get_attribute("href")
+
+print("Product URL:", product_url)
+
+# Navigate to the product details page
+driver.get(product_url)
+
+# Wait for quantity field
 quantity_input = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located(
+    EC.presence_of_element_located(
         (By.ID, "quantity")
     )
 )
+
+print("Product details page loaded.")
 
 # verify correct product
 product_id = driver.find_element(
