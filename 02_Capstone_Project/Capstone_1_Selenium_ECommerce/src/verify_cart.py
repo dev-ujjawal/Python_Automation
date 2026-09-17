@@ -1,136 +1,193 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import json
 import time
 
-# Start the chrome browser
+def close_ad_if_present(driver):
+    for _ in range(10):
+
+        ad = driver.find_elements(
+            By.ID,
+            "ad_position_box"
+        )
+
+        if ad:
+            print("Advertisement detected.")
+
+            close_button = driver.find_elements(
+                By.ID,
+                "dismiss-button"
+            )
+
+            if close_button:
+                driver.execute_script(
+                    "arguments[0].click();",
+                    close_button[0]
+                )
+
+                time.sleep(1)
+
+                print("Advertisement closed.")
+                return
+
+        time.sleep(1)
+
+    print("No advertisement appeared.")
+    
+
+# Start Chrome browser
 driver = webdriver.Chrome()
 
-# Open tutorialNinja homepage
-driver.get("https://tutorialsninja.com/demo/")
+# Open AutomationExercise
+driver.get("https://automationexercise.com/")
+close_ad_if_present(driver)
 
-# search for iphone
-search_box = driver.find_element(By.NAME, "search")
-search_box.send_keys("iphone")
+# Read test data from JSON
+with open("../test_data/test_data.json", "r") as file:
+    data = json.load(file)
 
-# Click search
+product = data["product"]
+expected_quantity = str(data["quantity"])
+
+# Click Products
 driver.find_element(
     By.CSS_SELECTOR,
-    "button.btn.btn-default.btn-lg"
+    "a[href='/products']"
 ).click()
 
-time.sleep(4)
-
-# Add iphone to cart
-driver.find_element(
-    By.CSS_SELECTOR,
-    "button[onclick^=\"cart.add('40'\"]"
-).click()
-
-time.sleep(4)
-
-# Open shopping Cart
-driver.find_element(
-    By.CSS_SELECTOR,
-    "a[title='Shopping Cart']"
-).click()
-
-time.sleep(4)
-
-# Locate the product row
-product_row = driver.find_element(
-    By.CSS_SELECTOR,
-    "table.table-bordered tbody tr"
+# Wait for Products page
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//h2[normalize-space()='All Products']")
+    )
 )
 
-# changing quantity to 2
-quantity = driver.find_element(
-    By.CSS_SELECTOR,
-    "input[name^='quantity[']"
+# Search for product
+search_box = driver.find_element(
+    By.ID,
+    "search_product"
 )
 
-quantity.clear()
-quantity.send_keys("2")
+search_box.send_keys(product)
 
-# Click on update to update the quantity
 driver.find_element(
-    By.CSS_SELECTOR,
-    "button[data-original-title='Update']"
+    By.ID,
+    "submit_search"
 ).click()
 
-time.sleep(4)
-
-# The cart page reloads after clicking Update,
-# so the product row must be located again.
-# locate the product row again after the page update
-
-# product_row = driver.find_element(
-#     By.XPATH,
-#     "//a[normalize-space()='iPhone']/ancestor::tr"
-# )
-
-# Display all rows in the cart table
-rows = driver.find_elements(
-    By.CSS_SELECTOR,
-    "table.table-bordered tbody tr"
+# Wait for search results
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//h2[normalize-space()='Searched Products']")
+    )
 )
 
-print("Number of rows:", len(rows))
 
-for row_index, row in enumerate(rows, start=1):
-    print(f"\n--- Row {row_index} ---")
+# Open product details page
+driver.find_element(
+    By.CSS_SELECTOR,
+    "a[href='/product_details/2']"
+).click()
 
-    cells = row.find_elements(By.TAG_NAME, "td")
+# Wait for product details page
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.ID, "quantity")
+    )
+)
 
-    print("Number of cells:", len(cells))
+# Set quantity to 4
+quantity_input = driver.find_element(
+    By.ID,
+    "quantity"
+)
 
-    for cell_index, cell in enumerate(cells, start=1):
-        print(f"Cell {cell_index}: {cell.text}")
+quantity_input.clear()
+quantity_input.send_keys(expected_quantity)
 
+# Add product to cart
+driver.find_element(
+    By.CSS_SELECTOR,
+    "button.cart"
+).click()
+
+# Wait for Add to Cart popup
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.CSS_SELECTOR, "button.close-modal")
+    )
+)
+
+# Close popup
+driver.find_element(
+    By.CSS_SELECTOR,
+    "button.close-modal"
+).click()
+
+# Open cart
+driver.find_element(
+    By.CSS_SELECTOR,
+    "a[href='/view_cart']"
+).click()
+
+# Wait for cart page
+WebDriverWait(driver, 10).until(
+    EC.url_contains("/view_cart")
+)
+
+# Locate Men Tshirt cart row
+product_row = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.ID, "product-2")
+    )
+)
+
+# Get product name
 product_name = product_row.find_element(
     By.CSS_SELECTOR,
-    "td:nth-child(2) a"
+    "td.cart_description h4 a"
 ).text
 
-model = product_row.find_element(
+# Get price
+price = product_row.find_element(
     By.CSS_SELECTOR,
-    "td:nth-child(3)"
+    "td.cart_price p"
 ).text
 
-quantity_input = driver.find_element(
+# Get quantity
+quantity = product_row.find_element(
     By.CSS_SELECTOR,
-    "input.form-control"
-)
-
-updated_quantity = quantity_input.get_attribute("value")
-
-unit_price = product_row.find_element(
-    By.CSS_SELECTOR,
-    "td:nth-child(5)"
+    "td.cart_quantity button"
 ).text
 
-# total = product_row.find_element(
-#     By.CSS_SELECTOR,
-#     "td:nth-child(6)"
-# ).text
-
-# Display all cells in the product row
-cells = product_row.find_elements(By.TAG_NAME, "td")
-
-print("Number of cells:", len(cells))
-
-for i, cell in enumerate(cells, start=1):
-    print(f"Cell {i}:", cell.text)
+# Get total
+total = product_row.find_element(
+    By.CSS_SELECTOR,
+    "td.cart_total p.cart_total_price"
+).text
 
 # Display cart details
-print("---------Cart Details---------")
+print("--------- Cart Details ---------")
 print("Product Name:", product_name)
-print("Model:", model)
-print("Quantity:", updated_quantity)
-print("Unit Price:", unit_price)
-# print("Total:", total)
+print("Price:", price)
+print("Quantity:", quantity)
+print("Total:", total)
 
-# Verify Cart 
-if product_name == "iphone" and updated_quantity == "2":
+# Calculate expected total
+unit_price = float(price.replace("Rs. ", ""))
+actual_total = float(total.replace("Rs. ", ""))
+expected_total = unit_price * int(expected_quantity)
+
+print("Expected Total: Rs.", expected_total)
+
+# Verify cart details
+if (
+    product_name == product
+    and quantity == expected_quantity
+    and actual_total == expected_total
+):
     print("Cart verification successful.")
 else:
     print("Cart verification failed.")

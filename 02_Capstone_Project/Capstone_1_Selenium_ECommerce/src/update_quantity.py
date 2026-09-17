@@ -1,57 +1,154 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import json
 
-# Start the browser first
+# Start the Chrome browser
 driver = webdriver.Chrome()
 
-# Now we will open the tutorialNinja homapage
-driver.get("https://tutorialsninja.com/demo/")
+# Open AutomationExercise
+driver.get("https://automationexercise.com/")
 
-# Search for Iphone
-search_box = driver.find_element(By.NAME, "search")
-search_box.send_keys("iphone")
+# Read test data from JSON
+with open("../test_data/test_data.json", "r") as file:
+    data = json.load(file)
 
-# click on search button
-driver.find_element(By.CSS_SELECTOR, "button.btn.btn-default.btn-lg").click()
+product = data["product"]
+new_quantity = str(data["quantity"])
 
-# wait for the result to show
-time.sleep(3)
+# Click Products
+driver.find_element(
+    By.CSS_SELECTOR,
+    "a[href='/products']"
+).click()
 
-# add iphone to cart
-driver.find_element(By.CSS_SELECTOR, "button[onclick^=\"cart.add('40'\"]").click()
+# Wait for Products page
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//h2[normalize-space()='All Products']")
+    )
+)
 
-time.sleep(3)
+print("Products page loaded.")
 
-# Now to open shopping cart
-driver.find_element(By.CSS_SELECTOR, "a[title='Shopping Cart']").click()
+# Search for the product
+search_box = driver.find_element(
+    By.ID,
+    "search_product"
+)
 
-time.sleep(3)
+search_box.send_keys(product)
 
-# Now just locate the quantity field
-quantity = driver.find_element(By.CSS_SELECTOR, "input[name^='quantity[']")
+driver.find_element(
+    By.ID,
+    "submit_search"
+).click()
 
-# change quantity from 1 to 2
-quantity.clear()
-quantity.send_keys("2")
+# Wait for search results
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//h2[normalize-space()='Searched Products']")
+    )
+)
 
-# click on update to update the quantity
-driver.find_element(By.CSS_SELECTOR, "button[data-original-title='Update']").click()
+print("Searched Products heading displayed.")
 
-time.sleep(4)
+# Get product link
+product_link = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.CSS_SELECTOR, "a[href='/product_details/2']")
+    )
+)
 
-# read the updated quantity
-updated_quantity = driver.find_element(By.CSS_SELECTOR, "input[name^='quantity[']").get_attribute("value")
+product_url = product_link.get_attribute("href")
 
-# print the updated quantity in terminal
-print("Updated quantity: ",updated_quantity)
+print("Product URL:", product_url)
 
-# verify update quantity
-if (updated_quantity == "2"):
+# Navigate to product details
+driver.get(product_url)
+
+# Wait for quantity field
+quantity_input = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.ID, "quantity")
+    )
+)
+
+print("Product details page loaded.")
+
+# Verify correct product
+product_id = driver.find_element(
+    By.ID,
+    "product_id"
+).get_attribute("value")
+
+if product_id == "2":
+    print("Men Tshirt product opened successfully.")
+else:
+    print("Incorrect product opened.")
+
+# Read current quantity
+current_quantity = quantity_input.get_attribute("value")
+
+print("Current quantity:", current_quantity)
+
+# Update quantity
+quantity_input.clear()
+quantity_input.send_keys(new_quantity)
+
+print("Updated quantity to:", new_quantity)
+
+# Add product to cart
+driver.find_element(
+    By.CSS_SELECTOR,
+    "button.cart"
+).click()
+
+# Wait for Add to Cart popup
+continue_shopping = WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.CSS_SELECTOR, "button.close-modal")
+    )
+)
+
+print("Add to Cart popup displayed.")
+
+# Close popup
+continue_shopping.click()
+
+# Open Cart
+driver.find_element(
+    By.CSS_SELECTOR,
+    "a[href='/view_cart']"
+).click()
+
+# Wait for Cart page
+WebDriverWait(driver, 10).until(
+    EC.url_contains("/view_cart")
+)
+
+print("Cart opened successfully.")
+
+# Locate product row
+product_row = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located(
+        (By.ID, "product-2")
+    )
+)
+
+# Read quantity from cart
+cart_quantity = product_row.find_element(
+    By.CSS_SELECTOR,
+    "td.cart_quantity button"
+).text
+
+print("Cart quantity:", cart_quantity)
+
+# Verify updated quantity
+if cart_quantity == new_quantity:
     print("Quantity updated successfully.")
 else:
-    print("Quantity Update failed")
+    print("Quantity update failed.")
 
-
-# close the browser 
 driver.quit()
