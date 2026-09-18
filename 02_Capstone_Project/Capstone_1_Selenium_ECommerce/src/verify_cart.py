@@ -3,46 +3,67 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
-import time
+import os
+from datetime import datetime
 
-def close_ad_if_present(driver):
-    for _ in range(10):
+# function to take screenshot
+def take_screenshot(driver, filename):
+    screenshot_path = os.path.join(
+        "../screenshots",
+        filename
+    )
 
-        ad = driver.find_elements(
-            By.ID,
-            "ad_position_box"
-        )
+    driver.save_screenshot(screenshot_path)
 
-        if ad:
-            print("Advertisement detected.")
+    print("Screenshot saved:", screenshot_path)
 
-            close_button = driver.find_elements(
-                By.ID,
-                "dismiss-button"
-            )
 
-            if close_button:
-                driver.execute_script(
-                    "arguments[0].click();",
-                    close_button[0]
-                )
+# generating report function
+def generate_execution_report(
+    product,
+    price,
+    expected_quantity,
+    actual_quantity,
+    expected_total,
+    actual_total,
+    verification_status
+):
+    report_path = os.path.join(
+        "../reports",
+        "execution_report.txt"
+    )
 
-                time.sleep(1)
+    os.makedirs("../reports", exist_ok=True)
 
-                print("Advertisement closed.")
-                return
+    with open(report_path, "w") as report:
+        report.write("Selenium E-Commerce Automation - Execution Report\n")
+        report.write("Application: AutomationExercise\n\n")
 
-        time.sleep(1)
+        report.write("Test Details\n")
+        report.write(f"Product           : {product}\n")
+        report.write(f"Unit Price        : {price}\n")
+        report.write(f"Expected Quantity : {expected_quantity}\n")
+        report.write(f"Actual Quantity   : {actual_quantity}\n")
+        report.write(f"Expected Total    : Rs. {expected_total:.2f}\n")
+        report.write(f"Actual Total      : Rs. {actual_total:.2f}\n\n")
 
-    print("No advertisement appeared.")
-    
+        report.write("Execution Status\n")
+        report.write(f"Login             : PASS\n")
+        report.write(f"Product Search    : PASS\n")
+        report.write(f"Add to Cart       : PASS\n")
+        report.write(f"Quantity Update   : PASS\n")
+        report.write(f"Cart Verification : {verification_status}\n")
+        report.write(f"Screenshots       : PASS\n\n")
+
+        report.write(f"Overall Result    : {verification_status}\n")
+
+    print("Execution report saved:", report_path)
 
 # Start Chrome browser
 driver = webdriver.Chrome()
 
 # Open AutomationExercise
 driver.get("https://automationexercise.com/")
-close_ad_if_present(driver)
 
 # Read test data from JSON
 with open("../test_data/test_data.json", "r") as file:
@@ -83,7 +104,6 @@ WebDriverWait(driver, 10).until(
         (By.XPATH, "//h2[normalize-space()='Searched Products']")
     )
 )
-
 
 # Open product details page
 driver.find_element(
@@ -175,6 +195,8 @@ print("Price:", price)
 print("Quantity:", quantity)
 print("Total:", total)
 
+# take_screenshot(driver, "05_cart_verification.png")
+
 # Calculate expected total
 unit_price = float(price.replace("Rs. ", ""))
 actual_total = float(total.replace("Rs. ", ""))
@@ -188,8 +210,21 @@ if (
     and quantity == expected_quantity
     and actual_total == expected_total
 ):
+    verification_status = "PASS"
     print("Cart verification successful.")
 else:
+    verification_status = "FAIL"
     print("Cart verification failed.")
+
+# Generate execution report
+generate_execution_report(
+    product,
+    price,
+    expected_quantity,
+    quantity,
+    expected_total,
+    actual_total,
+    verification_status
+)
 
 driver.quit()

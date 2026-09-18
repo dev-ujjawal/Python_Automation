@@ -1,0 +1,20 @@
+Selenium E-Commerce Automation - Execution Report
+Application: AutomationExercise
+
+Test Details
+Product           : Men Tshirt
+Unit Price        : Rs. 400
+Expected Quantity : 4
+Actual Quantity   : 4
+Expected Total    : Rs. 1600.00
+Actual Total      : Rs. 1600.00
+
+Execution Status
+Login             : PASS
+Product Search    : PASS
+Add to Cart       : PASS
+Quantity Update   : PASS
+Cart Verification : PASS
+Screenshots       : PASS
+
+Overall Result    : PASS

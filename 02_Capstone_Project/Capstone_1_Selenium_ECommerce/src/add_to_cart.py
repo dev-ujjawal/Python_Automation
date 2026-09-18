@@ -3,6 +3,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
+import os
+
+def take_screenshot(driver, filename):
+    screenshot_path = os.path.join(
+        "../screenshots",
+        filename
+    )
+
+    driver.save_screenshot(screenshot_path)
+
+    print("Screenshot saved:", screenshot_path)
 
 # Start the Chrome browser
 driver = webdriver.Chrome()
@@ -102,6 +113,8 @@ continue_shopping = WebDriverWait(driver, 10).until(
 )
 
 print("Add to Cart popup displayed.")
+
+take_screenshot(driver, "03_product_added.png")
 
 continue_shopping.click()
 

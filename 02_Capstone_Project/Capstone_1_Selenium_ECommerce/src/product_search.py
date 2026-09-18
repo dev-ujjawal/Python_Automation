@@ -3,6 +3,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
+import os
+
+def take_screenshot(driver, filename):
+    screenshot_path = os.path.join(
+        "../screenshots",
+        filename
+    )
+
+    driver.save_screenshot(screenshot_path)
+
+    print("Screenshot saved:", screenshot_path)
 
 # Start the chrome browser 
 driver = webdriver.Chrome()
@@ -44,6 +55,8 @@ searched_products = WebDriverWait(driver, 10).until(
 )
 
 print("Searched product heading displayed")
+
+take_screenshot(driver, "02_product_search.png")
 
 # verify searched product is visible or not
 product_element = WebDriverWait(driver, 10).until(

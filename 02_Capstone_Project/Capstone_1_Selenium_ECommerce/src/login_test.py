@@ -2,6 +2,17 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
 import time
+import os
+
+def take_screenshot(driver, filename):
+    screenshot_path = os.path.join(
+        "../screenshots",
+        filename
+    )
+
+    driver.save_screenshot(screenshot_path)
+
+    print("Screenshot saved:", screenshot_path)
 
 # I will be using chrome, you can use anyone-chrome,firefox,edge etc
 #start chrome browser
@@ -34,9 +45,10 @@ print("Page title: ", driver.title)
 print("Current URL: ", driver.current_url)
 
 if "Logged in as" in driver.page_source:
-    print("Login Successful")
+    print("Login successful.")
+    take_screenshot(driver, "01_login_success.png")
 else:
-    print("Login Failed")
+    print("Login failed.")
 
 # close the browser
 driver.quit()

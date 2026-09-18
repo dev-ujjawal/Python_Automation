@@ -3,6 +3,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
+import os
+
+def take_screenshot(driver, filename):
+    screenshot_path = os.path.join(
+        "../screenshots",
+        filename
+    )
+
+    driver.save_screenshot(screenshot_path)
+
+    print("Screenshot saved:", screenshot_path)
 
 # Start the Chrome browser
 driver = webdriver.Chrome()
@@ -99,6 +110,8 @@ quantity_input.send_keys(new_quantity)
 
 print("Updated quantity to:", new_quantity)
 
+take_screenshot(driver, "04_quantity_updated.png")
+
 # Add product to cart
 driver.find_element(
     By.CSS_SELECTOR,
@@ -144,6 +157,8 @@ cart_quantity = product_row.find_element(
 ).text
 
 print("Cart quantity:", cart_quantity)
+
+take_screenshot(driver, "04_quantity_updated-cart.png")
 
 # Verify updated quantity
 if cart_quantity == new_quantity:
