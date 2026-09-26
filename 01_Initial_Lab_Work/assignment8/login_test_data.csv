@@ -1,0 +1,7 @@
+test_case,username,password,expected_result
+TC01,tomsmith,SuperSecretPassword!,success
+TC02,tomsmith,wrongpassword,invalid
+TC03,wronguser,SuperSecretPassword!,invalid
+TC04,wronguser,wrongpassword,invalid
+TC05,,SuperSecretPassword!,invalid
+TC06,tomsmith,,invalid
